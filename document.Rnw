@@ -1,0 +1,70 @@
+\documentclass{article}
+
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{pgfplotstable}
+\usepackage{booktabs}
+\usepackage[top = 2cm]{geometry}
+\usepackage{listings}
+
+\title{A test of Knitr, pgfplotstable and gnuplot with \LaTeX}
+\author{Guillermo Juli\'an Moreno}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+First of all, let's see how does R behave.
+
+<<>>=
+data = read.table('datafile.txt');
+first_col = data$V1
+second_col = data$V2
+mean(second_col) # Only the last line prints the output
+@
+
+Seems nice enough, isn't it? I can also inline R results, so I can say that there are $\Sexpr{length(first_col)}$ values in that datafile, and the maximum of the first colum is $\Sexpr{max(first_col)}$. I could include those values in more complicated equations, such as \[ \max \{\mathrm{data}\} - \min \{\mathrm{data}\} = \Sexpr{max(first_col)} - \Sexpr{min(first_col)}  = \Sexpr{max(first_col) - min(first_col)}\]
+
+If the file changes, the results change too.
+
+On to a more real-life example: using R to create a plot. Just disabling the code output with \texttt{echo = FALSE} and setting a label to refer to the figure \ref{fig:RTest}
+
+<<RTest, fig.lp='fig:', fig.cap = 'This is the caption for the figure', echo = FALSE, cache= TRUE, fig.height = 2.5, fig.pos = 'hbtp'>>=
+par(mar = c(2,1,1.5,1)) # Just something to reduce the margins
+
+boxplot(second_col, horizontal = TRUE, main = "Testing the waters")
+@
+
+We could also include a Gnuplot script: just input the \textit{.tex} file and the results shows in figure \ref{fig:Gnuplot}.
+
+\begin{figure}[hbtp]
+\centering
+\input{graph.tex}
+\caption{A graph directly from Gnuplot}
+\label{fig:Gnuplot}
+\end{figure}
+
+And, finally, the \textit{pgfplotstable} sample: take a look at table \ref{tab:testTable}.
+
+\begin{table}[hbtp]
+\centering
+\pgfplotstableread{datafile.txt}\datatable
+\pgfplotstabletypeset[
+    columns/0/.style={column name={Column 1}},
+    columns/1/.style={column name={Column 2}},
+    every head row/.style={
+        before row=\toprule,    % booktabs rules
+        after row=\midrule
+    },
+    every last row/.style={
+        after row=\bottomrule
+    }]{\datatable}
+\caption{A test table.}
+\label{tab:testTable}
+\end{table}
+
+\end{document}
